@@ -2,11 +2,12 @@ import Searchbar from 'components/Searchbar';
 import ContentInfo from 'components/ImageGallery';
 import { Component } from 'react';
 
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
+
 class App extends Component {
   state = {
     searchValue: '',
-    isShowModal: false,
-    isLoading: false,
   };
 
   handleModal = () => {
@@ -22,6 +23,9 @@ class App extends Component {
   // };
 
   handleSearch = searchValue => {
+    if (searchValue === this.state.searchValue) {
+      return;
+    }
     this.setState({ searchValue });
   };
 
@@ -30,6 +34,7 @@ class App extends Component {
       <>
         <Searchbar handleSearch={this.handleSearch} />
         <ContentInfo searchValue={this.state.searchValue} />
+        <ToastContainer position="top-right" autoClose={3000} />
       </>
     );
   }
