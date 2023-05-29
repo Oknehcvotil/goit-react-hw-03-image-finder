@@ -1,41 +1,83 @@
-import Searchbar from 'components/Searchbar';
-import ContentInfo from 'components/ImageGallery';
 import { Component } from 'react';
 
-import 'react-toastify/dist/ReactToastify.css';
+import Searchbar from 'components/Searchbar';
+import ImageGallery from 'components/ImageGallery';
+import Loader from 'components/Loader';
+import ButtonLoadMore from 'components/ButtonLoadMore';
+import Modal from 'components/Modal';
+
 import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+import { AppContainer } from './App.styled';
 
 class App extends Component {
   state = {
     searchValue: '',
+    page: 1,
+    modalValue: {},
+    isLoading: false,
+    isLoadMore: false,
+    isModalOpen: false,
   };
 
-  handleModal = () => {
-    const { isShowModal } = this.state;
+  handleModal = modalValue => {
+    this.setState({ modalValue });
 
-    isShowModal
-      ? this.setState({ isShowModal: false })
-      : this.setState({ isShowModal: true });
+    this.setState(({ isModalOpen }) => ({
+      isModalOpen: !isModalOpen,
+    }));
   };
-
-  // closeModal = () => {
-  // this.setState({ isShowModal: false });
-  // };
 
   handleSearch = searchValue => {
     if (searchValue === this.state.searchValue) {
       return;
     }
     this.setState({ searchValue });
+    this.setState({ page: 1 });
+  };
+
+  onLoadMore = () => {
+    this.setState(({ page }) => ({
+      page: page + 1,
+    }));
+  };
+
+  handleLoader = () => {
+    this.setState(({ isLoading }) => ({
+      isLoading: !isLoading,
+    }));
+  };
+
+  handleLoadMore = value => {
+    this.setState({ isLoadMore: value });
   };
 
   render() {
+    const {
+      isLoading,
+      page,
+      searchValue,
+      isLoadMore,
+      isModalOpen,
+      modalValue,
+    } = this.state;
+
     return (
-      <>
+      <AppContainer>
+        {isModalOpen && <Modal data={modalValue} onClose={this.handleModal} />}
+        {isLoading && <Loader />}
         <Searchbar handleSearch={this.handleSearch} />
-        <ContentInfo searchValue={this.state.searchValue} />
+        <ImageGallery
+          page={page}
+          searchValue={searchValue}
+          onLoader={this.handleLoader}
+          onLoadMore={this.handleLoadMore}
+          onClick={this.handleModal}
+        />
+        {isLoadMore && <ButtonLoadMore onClick={this.onLoadMore} />}
         <ToastContainer position="top-right" autoClose={3000} />
-      </>
+      </AppContainer>
     );
   }
 }

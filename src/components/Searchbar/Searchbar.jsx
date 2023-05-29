@@ -1,8 +1,19 @@
 import PropTypes from 'prop-types';
+import { IoSearchSharp } from 'react-icons/io5';
 import { Component } from 'react';
 import { toast } from 'react-toastify';
+import {
+  SearchbarCont,
+  SearchForm,
+  SearchBtn,
+  SearchInput,
+} from './Searchbar.styled';
 
 class Searchbar extends Component {
+  static propTypes = {
+    handleSearch: PropTypes.func.isRequired,
+  };
+
   state = {
     value: '',
   };
@@ -18,7 +29,7 @@ class Searchbar extends Component {
       toast.warning('Please write what you are looking for.');
       return;
     }
-    
+
     this.props.handleSearch(this.state.value);
 
     this.setState({ value: '' });
@@ -26,14 +37,13 @@ class Searchbar extends Component {
 
   render() {
     return (
-      <header className="searchbar">
-        <form className="form" onSubmit={this.handleSubmit}>
-          <button type="submit" className="button">
-            <span className="button-label">Search</span>
-          </button>
+      <SearchbarCont>
+        <SearchForm onSubmit={this.handleSubmit}>
+          <SearchBtn type="submit">
+            <IoSearchSharp style={{ width: 25, height: 25 }} />
+          </SearchBtn>
 
-          <input
-            className="input"
+          <SearchInput
             type="text"
             autoComplete="off"
             autoFocus
@@ -41,8 +51,8 @@ class Searchbar extends Component {
             onChange={this.handleChange}
             value={this.state.value}
           />
-        </form>
-      </header>
+        </SearchForm>
+      </SearchbarCont>
     );
   }
 }

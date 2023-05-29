@@ -1,38 +1,42 @@
 import { Component } from 'react';
 import PropTypes from 'prop-types';
+import { toast } from 'react-toastify';
 import getImgs from 'services/getImgs';
 import ImageGalleryItem from 'components/ImageGalleryItem';
-import { toast } from 'react-toastify';
+import { ImageGalleryCont } from './ImageGallery.styled';
 
 class ImageGallery extends Component {
+  static propTypes = {
+    page: PropTypes.number.isRequired,
+    searchValue: PropTypes.string.isRequired,
+    onLoadMore: PropTypes.func.isRequired,
+    onLoader: PropTypes.func.isRequired,
+    onClick: PropTypes.func.isRequired,
+  };
+
   state = {
     images: [],
-    page: 1,
-    isLoading: false,
-    loadMore: false,
   };
 
   async componentDidUpdate(prevProps, prevState) {
-    const { page } = this.state;
+    const { page, searchValue, onLoadMore, onLoader } = this.props;
 
-    if (
-      prevProps.searchValue !== this.props.searchValue ||
-      prevState.page !== page
-    ) {
-      if (page === 1) {
-        this.setState({ images: [], loadMore: false });
+    if (prevProps.searchValue !== searchValue || prevProps.page !== page) {
+      if (prevProps.searchValue !== searchValue) {
+        onLoadMore(false);
+        this.setState({ images: [] });
       }
 
-      this.setState({ isLoading: true });
+      onLoader();
+
       try {
-        const data = await getImgs(this.props.searchValue, page);
+        const data = await getImgs(searchValue, page);
         const { hits, totalHits } = data;
 
         const perPage = 12;
         const totalPages = Math.ceil(totalHits / perPage);
 
         if (totalHits === 0 || !hits) {
-          this.setState({ isLoading: false });
           toast.error(
             'Sorry, there are no images matching your search query. Please try again.'
           );
@@ -40,14 +44,14 @@ class ImageGallery extends Component {
         }
 
         if (totalPages > 1) {
-          this.setState({ loadMore: true });
+          onLoadMore(true);
         }
 
         if (page === totalPages) {
           toast.info(
             "We're sorry, but you've reached the end of search results."
           );
-          this.setState({ loadMore: false });
+          onLoadMore(false);
         }
 
         if (page === 1) {
@@ -58,35 +62,28 @@ class ImageGallery extends Component {
       } catch (error) {
         toast.error(`${error.message}`);
       } finally {
-        this.setState({ isLoading: false });
+        this.props.onLoader();
       }
     }
   }
 
-  handleLoadMore = () => {
-    this.setState(({ page }) => ({
-      page: page + 1,
-      isLoading: true,
-    }));
-  };
-
   render() {
-    const { images, isLoading, loadMore } = this.state;
+    const { images } = this.state;
+    const { onClick } = this.props;
 
     return (
-      <>
-        <ul className="gallery">
-          {images.map(({ id, webformatURL, tags }) => (
-            <ImageGalleryItem key={id} id={id} img={webformatURL} alt={tags} />
-          ))}
-          {isLoading && <h1>Loading...</h1>}
-          {loadMore && (
-            <button type="button" onClick={this.handleLoadMore}>
-              Load more...
-            </button>
-          )}
-        </ul>
-      </>
+      <ImageGalleryCont className="gallery">
+        {images.map(({ id, webformatURL, tags, largeImageURL }) => (
+          <ImageGalleryItem
+            key={id}
+            id={id}
+            img={webformatURL}
+            largeImg={largeImageURL}
+            alt={tags}
+            onClick={onClick}
+          />
+        ))}
+      </ImageGalleryCont>
     );
   }
 }
