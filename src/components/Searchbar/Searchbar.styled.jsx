@@ -30,10 +30,12 @@ export const SearchForm = styled.form`
 `;
 
 export const SearchBtn = styled.button`
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 48px;
   height: 48px;
-  border: 0;  
+  border: 0;
   opacity: 0.6;
   transition: opacity 250ms cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
